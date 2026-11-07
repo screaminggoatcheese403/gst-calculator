@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b0b0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GST Split">
+<meta name="description" content="A fast 5% GST and nonprofit 2.5% split calculator, with tips and cent-perfect QuickBooks entries.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<title>GST Split • Calculator</title>
+<style>
+:root {color-scheme:dark;--bg:#0b0b0e;--panel:#1b1c20;--panel2:#23242a;--line:#34343a;--muted:#a5a5b0;--text:#fafafa;--orange:#ff9f0a;--orange2:#ffba50;--red:#ff6b67;--green:#73e0af;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button:focus-visible{outline:3px solid #ffcb80;outline-offset:2px}
+.app{width:min(100%,490px);min-height:100dvh;height:100dvh;margin:0 auto;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,.16)}
+.content{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:calc(var(--safe-top) + 14px) 20px 12px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;gap:11px;align-items:center}
+.brand-symbol{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--orange);color:#101013;font-size:23px;font-weight:850;letter-spacing:-2px}
+.brand-name{font-size:19px;font-weight:750;letter-spacing:-.6px;line-height:1.08}
+.brand-sub{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.7px;margin-top:4px;text-transform:uppercase}
+.head-actions{display:flex;gap:6px}
+.icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:14px;background:#1d1e22;color:#fff;font-size:20px;display:grid;place-items:center}
+.mode-caption{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.15px;text-transform:uppercase;margin-bottom:8px}
+.switch{display:grid;grid-template-columns:1fr 1fr;background:#222328;padding:4px;border-radius:16px;gap:4px;margin-bottom:13px}
+.switch button{border:0;border-radius:12px;background:transparent;color:#a8a8b1;padding:12px 4px;font-size:14px;font-weight:720}
+.switch button.active{background:var(--orange);color:#17130d;box-shadow:0 2px 7px rgba(0,0,0,.22)}
+.primary{width:100%;display:block;text-align:left;border:1px solid #49403a;border-radius:20px;background:linear-gradient(140deg,#242225,#1d1c20);padding:15px 18px 14px;min-height:109px}
+.primary.active,.tip.active{border-color:var(--orange);box-shadow:0 0 0 1px #ff9f0a55 inset}
+.primary-top{display:flex;justify-content:space-between;gap:6px;align-items:center;color:var(--orange2);font-size:11px;font-weight:760;letter-spacing:1.05px;text-transform:uppercase}
+.primary-hint{color:#99949b;letter-spacing:0;text-transform:none;font-size:11px;font-weight:520}
+.big-value{display:block;text-align:right;font-size:clamp(39px,12vw,61px);font-weight:550;letter-spacing:-1.9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.05;margin-top:11px}
+.tip{width:100%;margin-top:9px;min-height:43px;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:14px;background:#18191d;padding:9px 14px;color:var(--muted)}
+.tip-icon{font-size:18px;color:var(--orange)}
+.tip-label{font-weight:650;font-size:14px}
+.tip-info{font-size:11px;color:#888892;margin-left:2px}
+.tip-value{margin-left:auto;color:var(--text);font-weight:730;font-size:17px}
+.results{padding:14px 4px 7px}
+.calc-line{display:flex;align-items:baseline;justify-content:space-between;padding:4px 0;gap:12px;color:#c7c7d0;font-size:15px}
+.calc-line output{font-size:18px;font-weight:620;color:#f1f1f3}
+.calc-line .minor{color:#888994;font-weight:450;font-size:12px}
+.calc-line.total{border-top:1px solid #44434a;margin-top:8px;padding-top:11px;color:white;font-weight:790}
+.calc-line.total output{font-size:27px;letter-spacing:-.5px;color:var(--orange)}
+.split{background:#18191d;border:1px solid #363437;border-radius:18px;padding:12px 14px 13px;margin-top:7px}
+.split-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.split-heading strong{font-size:14px;letter-spacing:-.2px}
+.split-pill{padding:5px 9px;border-radius:20px;background:#41301a;color:#ffbc58;font-size:11px;font-weight:750;white-space:nowrap}
+.split-line{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:5px;font-size:13px;color:#cbcad2}
+.split-line output{font-size:20px;font-weight:690;color:white}
+.split-line small{display:block;font-size:11px;color:#92919b;margin-top:1px}
+.round-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:11px}
+.round-controls button{border:1px solid #404047;border-radius:10px;background:#26272c;color:#babac3;font-size:11px;font-weight:740;padding:8px 3px}
+.round-controls button.active{color:#141217;background:#ffbb53;border-color:#ffbb53}
+.note{font-size:11px;line-height:1.3;color:#9e9da6;margin-top:8px;min-height:13px}
+.warning{color:#ff9a91}
+.bottom-links{display:flex;align-items:center;gap:8px;margin-top:9px}
+.secondary{background:transparent;border:1px solid #494951;color:#e5e5e9;border-radius:12px;padding:10px 13px;font-size:12px;font-weight:710;flex:1}
+.secondary.emphasis{color:#ffb44a;border-color:#765222}
+.helper{font-size:11px;color:#83838d;line-height:1.3;margin:10px 2px 0;text-align:center}
+.pad{flex-shrink:0;padding:12px 17px calc(var(--safe-bottom) + 13px);background:#121316;border-top:1px solid #29292e;box-shadow:0 -10px 25px #08080844}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.key{min-height:54px;height:clamp(54px,7.1dvh,69px);border:0;border-radius:17px;background:#2d2e33;color:#fcfcff;font-size:29px;font-weight:490;transition:background .08s;}
+.key:active{background:#45464b;transform:scale(.976)}
+.key.fn{background:#414148;font-size:18px;font-weight:670}
+.key.action{background:#f5a11e;color:#1b1510;font-size:14px;font-weight:810;letter-spacing:.3px}
+.key.action:active{background:#ffc36d}
+.key.muted-action{background:#583c19;color:#ffc36e}
+@media(max-height:950px){
+.content{padding-top:calc(var(--safe-top) + 9px);padding-bottom:7px}
+.head{margin-bottom:10px}.brand-symbol{width:36px;height:36px;border-radius:11px;font-size:21px}.brand-name{font-size:18px}.brand-sub{font-size:10px}
+.mode-caption{margin-bottom:5px}.switch{margin-bottom:8px}.switch button{padding:9px 3px}
+.primary{min-height:94px;padding:12px 16px}.big-value{font-size:clamp(39px,11.4vw,56px);margin-top:6px}
+.tip{margin-top:7px;min-height:39px;padding:7px 12px}
+.results{padding:8px 4px 3px}.calc-line{padding:2px 0;font-size:14px}.calc-line output{font-size:17px}.calc-line.total{margin-top:4px;padding-top:6px}.calc-line.total output{font-size:24px}
+.split{padding:10px 12px;margin-top:5px}.split-heading{margin-bottom:6px}.split-line{margin-top:3px}.split-line output{font-size:18px}.round-controls{margin-top:7px}.round-controls button{padding:6px 3px}.note{margin-top:6px}
+.bottom-links{margin-top:6px}.secondary{padding:8px 11px}.helper{margin-top:4px}
+.pad{padding:8px 14px calc(var(--safe-bottom) + 9px)}.keys{gap:7px}.key{height:clamp(47px,6dvh,58px);min-height:47px;border-radius:15px;font-size:25px}
+}
+@media(max-height:760px){.content{padding-top:calc(var(--safe-top) + 7px)}.head{margin-bottom:11px}.primary{min-height:95px;padding-top:10px;padding-bottom:10px}.big-value{margin-top:7px}.results{padding-top:8px}.calc-line{padding:2px 0}.split{margin-top:3px}.key{height:51px;min-height:51px}.pad{padding-top:8px}.bottom-links{margin-top:6px}}
+@media(min-width:620px){body{background:#18191c}.app{border-left:1px solid #38383e;border-right:1px solid #38383e}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+dialog{width:min(calc(100% - 30px),430px);max-height:min(85dvh,750px);overflow-y:auto;background:#202126;border:1px solid #4b4b54;border-radius:21px;padding:22px;color:#fff;box-shadow:0 22px 90px #000b}
+dialog::backdrop{background:#030306bb;backdrop-filter:blur(4px)}
+.modal-title{font-size:22px;font-weight:760;margin:0 0 6px}.modal-intro{font-size:13px;line-height:1.5;color:#b2b2be;margin:0 0 17px}
+.modal-row{display:flex;justify-content:space-between;border-bottom:1px solid #3e3e46;padding:11px 0;gap:14px;font-size:13px}
+.modal-row:last-of-type{border-bottom:0}.modal-row span{color:#b6b5c0}.modal-row strong{font-size:15px;text-align:right}
+.modal-section{color:#ffb85b;text-transform:uppercase;font-size:11px;letter-spacing:1px;font-weight:780;margin:18px 0 3px}
+.modal-buttons{display:flex;gap:10px;margin-top:22px}.modal-buttons button{flex:1;border:0;border-radius:13px;padding:13px 12px;font-size:14px;font-weight:750;background:#3e3e44;color:white}.modal-buttons button.accent{background:var(--orange);color:#1c160c}
+.instructions{font-size:14px;line-height:1.65;color:#d9d7df;padding-left:21px}.instructions li+li{margin-top:5px}
+#toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 305px);transform:translateX(-50%);background:#eeeeef;color:#171719;border-radius:30px;padding:9px 16px;font-weight:700;font-size:13px;white-space:nowrap;box-shadow:0 6px 20px #0005;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+#toast.visible{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="content" id="content">
+    <header class="head">
+      <div class="brand"><div class="brand-symbol" aria-hidden="true">½</div><div><div class="brand-name">GST Split</div><div class="brand-sub">Five percent · two ways</div></div></div>
+      <div class="head-actions"><button type="button" class="icon-button" id="installBtn" title="Add to Home Screen" aria-label="How to add to Home Screen">↗</button><button type="button" class="icon-button" id="helpBtn" title="How it works" aria-label="Help">?</button></div>
+    </header>
+    <div class="mode-caption">Enter an amount as</div>
+    <div class="switch" role="group" aria-label="Amount input type"><button type="button" data-mode="price" id="modePrice">Before GST</button><button type="button" data-mode="total" id="modeTotal">Total paid</button></div>
+    <button type="button" class="primary active" id="mainAmount" aria-label="Edit amount with the calculator keypad">
+      <span class="primary-top"><span id="inputLabel">TOTAL INCLUDING GST</span><span class="primary-hint">Tap to edit</span></span>
+      <span class="big-value" id="mainValue">$0.00</span>
+    </button>
+    <button type="button" class="tip" id="tipAmount" aria-label="Edit tip with calculator keypad"><span class="tip-icon" aria-hidden="true">＋</span><span class="tip-label">Tip</span><span class="tip-info">Not taxed</span><span class="tip-value" id="tipValue">$0.00</span></button>
+    <div class="results" aria-live="polite" aria-atomic="true">
+      <div class="calc-line"><span>Price before GST</span><output id="baseResult">$0.00</output></div>
+      <div class="calc-line"><span>GST <span class="minor">5%</span></span><output id="gstResult">$0.00</output></div>
+      <div class="calc-line total"><span>Total paid <span class="minor">with tip</span></span><output id="totalResult">$0.00</output></div>
+    </div>
+    <section class="split" aria-label="GST split">
+      <div class="split-heading"><strong>Split the GST</strong><span class="split-pill">2.5% + 2.5%</span></div>
+      <div class="split-line"><div>First half <small>NPR 2.5% tax in QuickBooks</small></div><output id="nprResult">$0.00</output></div>
+      <div class="split-line"><div>Second half <small>Expense line · Exempt</small></div><output id="expenseResult">$0.00</output></div>
+      <div class="round-controls" role="group" aria-label="GST cent rounding preference"><button type="button" data-round="qbo" class="active">Match QBO</button><button type="button" data-round="up">First ↑</button><button type="button" data-round="down">First ↓</button></div>
+      <div class="note" id="roundNote">Rounding automatically matches QuickBooks NPR 2.5%.</div>
+    </section>
+    <div class="bottom-links"><button type="button" class="secondary" id="detailsBtn">QuickBooks lines</button><button type="button" class="secondary emphasis" id="copyBtn">Copy entry</button></div>
+    <p class="helper" id="helper">Enter the payment total, then add a tip if needed.</p>
+  </div>
+  <section class="pad" aria-label="Calculator keypad">
+    <div class="keys" id="keypad">
+      <button type="button" class="key" data-key="7">7</button><button type="button" class="key" data-key="8">8</button><button type="button" class="key" data-key="9">9</button><button type="button" class="key fn" data-key="back" aria-label="Delete last digit">⌫</button>
+      <button type="button" class="key" data-key="4">4</button><button type="button" class="key" data-key="5">5</button><button type="button" class="key" data-key="6">6</button><button type="button" class="key fn" data-key="clear">C</button>
+      <button type="button" class="key" data-key="1">1</button><button type="button" class="key" data-key="2">2</button><button type="button" class="key" data-key="3">3</button><button type="button" class="key action muted-action" data-key="tip">TIP</button>
+      <button type="button" class="key" data-key="00">00</button><button type="button" class="key" data-key="0">0</button><button type="button" class="key" data-key=".">.</button><button type="button" class="key action" data-key="switch">↔</button>
+    </div>
+  </section>
+</div>
+<dialog id="detailsDialog" aria-labelledby="detailsTitle">
+  <h2 class="modal-title" id="detailsTitle">QuickBooks expense lines</h2><p class="modal-intro">Use <b>Amounts are: Exclusive of Tax</b> in QuickBooks. GST and tip are separated so the payment reconciles to the cent.</p>
+  <div class="modal-section">Line 1 · taxable expense</div><div class="modal-row"><span>Amount / NPR 2.5%</span><strong id="qboBase">$0.00</strong></div><div class="modal-row"><span>Auto-calculated tax</span><strong id="qboNpr">$0.00</strong></div>
+  <div class="modal-section">Line 2 · extra GST expense</div><div class="modal-row"><span>Amount / Exempt</span><strong id="qboExpense">$0.00</strong></div>
+  <div id="tipQboLine" hidden><div class="modal-section">Line 3 · tip</div><div class="modal-row"><span>Amount / Exempt</span><strong id="qboTip">$0.00</strong></div></div>
+  <div class="modal-section">Reconciliation</div><div class="modal-row"><span>Transaction total</span><strong id="qboTotal">$0.00</strong></div><p class="note" id="qboNote"></p>
+  <div class="modal-buttons"><button type="button" id="closeDetails">Close</button><button type="button" class="accent" id="copyDetails">Copy lines</button></div>
+</dialog>
+<dialog id="helpDialog" aria-labelledby="helpTitle">
+  <h2 class="modal-title" id="helpTitle">How to use GST Split</h2>
+  <p class="modal-intro">Tap <b>Before GST</b> if you know the price, or <b>Total paid</b> if you know the amount charged. Use the calculator keys to enter the number.</p>
+  <ol class="instructions"><li>Tap <b>Tip</b> to enter a separate tip. It is not subject to GST.</li><li>The first 2.5% is the QuickBooks <b>NPR 2.5%</b> tax amount. The other portion is an <b>Exempt</b> expense line.</li><li><b>Match QBO</b> is recommended. The ↑ and ↓ options manually change which portion receives the extra cent.</li><li>Tap <b>QuickBooks lines</b> to see the entry, or <b>Copy entry</b> to copy it.</li></ol>
+  <div class="modal-buttons"><button type="button" class="accent" id="closeHelp">Got it</button></div>
+</dialog>
+<dialog id="installDialog" aria-labelledby="installTitle">
+  <h2 class="modal-title" id="installTitle">Add to iPhone Home Screen</h2>
+  <p class="modal-intro">Once this calculator is published to an HTTPS website (such as GitHub Pages), you can install it like an app.</p>
+  <ol class="instructions"><li>Open the calculator's website in <b>Safari</b> on your iPhone.</li><li>Tap the <b>Share</b> icon (square with upward arrow).</li><li>Choose <b>Add to Home Screen</b>, then tap <b>Add</b>.</li><li>Open <b>GST Split</b> from the new icon. It works offline after it has been loaded once.</li></ol>
+  <p class="note">Opening an HTML file directly from Files is useful for testing, but not a reliable way to install an offline web app. Use the GitHub Pages version.</p>
+  <div class="modal-buttons"><button type="button" class="accent" id="closeInstall">Done</button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const money = cents => new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD'}).format(cents/100);
+  const parseCents = str => {
+    const [d='0',f=''] = str.split('.');
+    return Math.max(0,Math.min(999999999999,Number(d||0)*100 + Number((f+'00').slice(0,2))));
+  };
+  const centsToRaw = n => (n/100).toFixed(2);
+  // All monetary calculations use integer cents to avoid floating point drift.
+  const gstCents = base => Math.floor((base*5+50)/100); // 5%, standard half-up
+  const qboCents = base => Math.floor((base*25+500)/1000); // 2.5%, half-up
+  const state = { mode:'total', active:'main', entered:'0', tip:'0', round:'qbo' };
+  let lastToastTimer;
+  function calc() {
+    const input = parseCents(state.entered), tip = parseCents(state.tip);
+    let base, gst, total, error = false;
+    if(state.mode==='price') {
+      base=input; gst=gstCents(base); total=base+gst+tip;
+    } else {
+      total=input; error = tip>total;
+      const taxable = Math.max(0,total-tip);
+      base = Math.round(taxable/1.05);
+      gst = taxable-base; // residual ensures total always reconciles
+    }
+    let first = state.round==='up' ? Math.ceil(gst/2) : state.round==='down' ? Math.floor(gst/2) : qboCents(base);
+    first = Math.max(0,Math.min(gst,first));
+    const second = gst-first;
+    return {input,tip,base,gst,total,first,second,error,qboFirst:qboCents(base)};
+  }
+  const stripCurrency = str => money(parseCents(str));
+  function render() {
+    const v=calc();
+    $('modePrice').classList.toggle('active',state.mode==='price');
+    $('modeTotal').classList.toggle('active',state.mode==='total');
+    $('modePrice').setAttribute('aria-pressed',String(state.mode==='price'));
+    $('modeTotal').setAttribute('aria-pressed',String(state.mode==='total'));
+    $('inputLabel').textContent=state.mode==='price'?'PRICE BEFORE GST':'TOTAL INCLUDING GST + TIP';
+    $('mainValue').textContent=stripCurrency(state.entered);
+    $('tipValue').textContent=stripCurrency(state.tip);
+    $('mainAmount').classList.toggle('active',state.active==='main');
+    $('tipAmount').classList.toggle('active',state.active==='tip');
+    $('baseResult').textContent=money(v.base);
+    $('gstResult').textContent=money(v.gst);
+    $('totalResult').textContent=money(v.total);
+    $('nprResult').textContent=money(v.first);
+    $('expenseResult').textContent=money(v.second);
+    document.querySelectorAll('[data-round]').forEach(b=>{b.classList.toggle('active',state.round===b.dataset.round);b.setAttribute('aria-pressed',String(state.round===b.dataset.round));});
+    const manuallyDifferent=state.round!=='qbo'&&v.first!==v.qboFirst;
+    const note = v.error ? 'The tip cannot exceed the total paid. Please correct one of the amounts.' : manuallyDifferent ? 'QuickBooks may calculate a different NPR tax. Override it to use this split.' : (v.gst%2 ? 'One extra cent goes to the '+(v.first>v.second?'first':'second')+' half.' : 'Both halves reconcile to the full GST.');
+    $('roundNote').textContent=note;
+    $('roundNote').classList.toggle('warning',v.error||manuallyDifferent);
+    $('helper').textContent=v.error?'Check the tip and total before copying the entry.':state.active==='tip'?'Entering the tip. Tap the large amount to switch back.':state.mode==='total'?'Total paid includes GST and any tip you enter.':'Price before GST. The total and both GST halves update automatically.';
+    $('copyBtn').disabled=v.error;
+    $('detailsBtn').disabled=v.error;
+    $('copyBtn').style.opacity=v.error?'.4':'1';
+    $('detailsBtn').style.opacity=v.error?'.4':'1';
+    $('qboBase').textContent=money(v.base); $('qboNpr').textContent=money(v.first); $('qboExpense').textContent=money(v.second);
+    $('qboTip').textContent=money(v.tip); $('tipQboLine').hidden=v.tip===0; $('qboTotal').textContent=money(v.total);
+    $('qboNote').textContent=manuallyDifferent?'Because you chose manual rounding, QuickBooks may require a one-cent tax override.':'With Match QBO selected, the NPR tax normally matches the QuickBooks 2.5% calculation. Different invoice tax-rounding methods can occasionally produce a one-cent difference.';
+  }
+  function setMode(mode) {
+    if(mode===state.mode) {state.active='main';render();return;}
+    const v=calc();
+    if(v.error) {state.mode=mode;state.entered='0';} else {state.entered=centsToRaw(mode==='total'?v.total:v.base);state.mode=mode;}
+    state.active='main';render();
+  }
+  function editKey(key) {
+    if(key==='tip'){state.active='tip';render();return;}
+    if(key==='switch'){setMode(state.mode==='total'?'price':'total');return;}
+    const field=state.active==='tip'?'tip':'entered'; let raw=state[field];
+    if(key==='clear'){raw='0';}
+    else if(key==='back') {raw=raw.slice(0,-1)||'0';if(raw.endsWith('.'))raw=raw.slice(0,-1)||'0';}
+    else if(key==='.') {if(!raw.includes('.'))raw+='.';}
+    else if(/^\d{1,2}$/.test(key)) {
+      const decimalPart=raw.includes('.')?raw.split('.')[1]:null;
+      if(decimalPart!==null && decimalPart.length+key.length>2)return;
+      if(raw.length+key.length>14)return;
+      raw=raw==='0'? (key==='00'?'0':key):raw+key;
+    }
+    state[field]=raw; render();
+  }
+  function copyText() {
+    const v=calc(); if(v.error)return;
+    const lines=[`GST Split — 5%`, `Price before GST: ${money(v.base)}`,`GST 5%: ${money(v.gst)}`, `NPR 2.5%: ${money(v.first)}`,`GST expensed: ${money(v.second)}`,`Tip (not taxed): ${money(v.tip)}`,`TOTAL: ${money(v.total)}`,'',`QuickBooks · Amounts exclusive of tax:`,`1. Expense — ${money(v.base)} — NPR 2.5% (GST ${money(v.first)})`,`2. GST to expense — ${money(v.second)} — Exempt`];
+    if(v.tip>0)lines.push(`3. Tip — ${money(v.tip)} — Exempt`);
+    if(v.first!==v.qboFirst)lines.push('NOTE: Manual GST rounding — may require tax override in QuickBooks.');
+    return lines.join('\n');
+  }
+  function toast(s){$('toast').textContent=s;$('toast').classList.add('visible');clearTimeout(lastToastTimer);lastToastTimer=setTimeout(()=>$('toast').classList.remove('visible'),2100);}
+  async function copyEntry(){const txt=copyText();if(!txt)return;try{await navigator.clipboard.writeText(txt);toast('QuickBooks entry copied');}catch(e){try{const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('Entry copied');}catch(_){toast('Could not copy automatically');}}}
+  $('modePrice').addEventListener('click',()=>setMode('price'));
+  $('modeTotal').addEventListener('click',()=>setMode('total'));
+  $('mainAmount').addEventListener('click',()=>{state.active='main';render();});
+  $('tipAmount').addEventListener('click',()=>{state.active='tip';render();});
+  document.querySelectorAll('[data-round]').forEach(b=>b.addEventListener('click',()=>{state.round=b.dataset.round;render();}));
+  $('keypad').addEventListener('click',ev=>{const key=ev.target.closest('[data-key]');if(key)editKey(key.dataset.key);});
+  document.addEventListener('keydown',e=>{
+    if(document.querySelector('dialog[open]'))return;
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    let key=null;
+    if(/^[0-9]$/.test(e.key))key=e.key;
+    else if(e.key==='.'||e.key===',')key='.';
+    else if(e.key==='Backspace')key='back';
+    else if(e.key==='Delete'||e.key==='Escape')key='clear';
+    if(key){e.preventDefault();editKey(key);}
+  });
+  $('detailsBtn').addEventListener('click',()=>{$('detailsDialog').showModal();});
+  $('copyBtn').addEventListener('click',copyEntry);
+  $('copyDetails').addEventListener('click',copyEntry);
+  $('closeDetails').addEventListener('click',()=>$('detailsDialog').close());
+  $('helpBtn').addEventListener('click',()=>$('helpDialog').showModal());
+  $('closeHelp').addEventListener('click',()=>$('helpDialog').close());
+  $('installBtn').addEventListener('click',()=>$('installDialog').showModal());
+  $('closeInstall').addEventListener('click',()=>$('installDialog').close());
+  for(const d of document.querySelectorAll('dialog'))d.addEventListener('click',e=>{if(e.target===d)d.close();});
+  if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));
+  }
+  render();
+  // Expose a read-only diagnostic for automated calculation tests.
+  Object.defineProperty(window,'__gstSplitDiagnostic',{get:()=>({...calc(),mode:state.mode,round:state.round})});
+})();
+</script>
+</body>
+</html>
